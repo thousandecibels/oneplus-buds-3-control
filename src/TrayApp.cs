@@ -13,6 +13,7 @@ namespace Buds3Control
     {
         private readonly NotifyIcon icon;
         private readonly Icon artwork;
+        private readonly ControlWindow controls;
         private readonly ContextMenuStrip menu;
         private readonly ToolStripLabel status;
         private readonly ToolStripLabel batteryStatus;
@@ -23,6 +24,7 @@ namespace Buds3Control
         private readonly Timer timer;
         private BudsSession session;
         private NoiseMode? current;
+        private NoiseMode? pendingMode;
         private BatteryLevels battery;
         private bool busy;
         private bool exiting;
@@ -32,6 +34,8 @@ namespace Buds3Control
         internal TrayApp()
         {
             menu = new ContextMenuStrip();
+            menu.Items.Add(new ToolStripMenuItem("Open controls", null, (sender, args) => controls.Show()));
+            menu.Items.Add(new ToolStripSeparator());
             menu.Items.Add(new ToolStripLabel(Bluetooth.DeviceName)
             {
                 Font = new Font(SystemFonts.MenuFont, FontStyle.Bold)
@@ -58,19 +62,17 @@ namespace Buds3Control
                 MessageBox.Show(problem, Program.AppName, MessageBoxButtons.OK, MessageBoxIcon.Information));
             menu.Items.Add(details);
             menu.Items.Add(new ToolStripMenuItem("Bluetooth settings", null,
-                (sender, args) => System.Diagnostics.Process.Start("ms-settings:bluetooth")));
+                (sender, args) => OpenBluetoothSettings()));
             menu.Items.Add(new ToolStripMenuItem("Exit", null, (sender, args) => ExitThread()));
 
             artwork = CreateIcon();
+            controls = new ControlWindow(artwork.Handle, mode => UpdateAsync(mode), () => UpdateAsync(null), OpenBluetoothSettings);
             icon = new NotifyIcon { Icon = artwork, ContextMenuStrip = menu, Text = Program.AppName, Visible = true };
             icon.MouseUp += (sender, args) =>
             {
-                if (args.Button != MouseButtons.Left) return;
-                // NotifyIcon already handles the right-click menu. Focus it here for left clicks too.
-                SetForegroundWindow(menu.Handle);
-                menu.Show(Cursor.Position);
+                if (args.Button == MouseButtons.Left) controls.Show();
             };
-            icon.BalloonTipClicked += (sender, args) => UpdateAsync(null);
+            icon.BalloonTipClicked += (sender, args) => controls.Show();
             Render();
 
             timer = new Timer { Interval = 1 };
@@ -80,6 +82,12 @@ namespace Buds3Control
                 UpdateAsync(null);
             };
             timer.Start();
+            controls.Show();
+        }
+
+        private static void OpenBluetoothSettings()
+        {
+            System.Diagnostics.Process.Start("ms-settings:bluetooth");
         }
 
         private void AddChoice(ToolStripItemCollection items, NoiseMode mode)
@@ -92,7 +100,12 @@ namespace Buds3Control
 
         private async void UpdateAsync(NoiseMode? target)
         {
-            if (busy || exiting) return;
+            if (exiting) return;
+            if (busy)
+            {
+                if (target.HasValue) pendingMode = target;
+                return;
+            }
             busy = true;
             Render();
 
@@ -109,6 +122,11 @@ namespace Buds3Control
             {
                 icon.ShowBalloonTip(4500, Program.AppName, problem, ToolTipIcon.Warning);
             }
+
+            // Keep the panel interactive while the single Bluetooth request completes.
+            NoiseMode? next = pendingMode;
+            pendingMode = null;
+            if (connected && next.HasValue) UpdateAsync(next);
         }
 
         private Result UpdateDevice(NoiseMode? target)
@@ -154,7 +172,7 @@ namespace Buds3Control
             status.AutoToolTip = problem != null;
             batteryStatus.Visible = connected;
             batteryStatus.Text = String.Format("Left {0}   Right {1}   Case {2}",
-                FormatBattery(battery.Left), FormatBattery(battery.Right), FormatBattery(battery.Case));
+                Program.FormatBattery(battery.Left), Program.FormatBattery(battery.Right), Program.FormatBattery(battery.Case));
             details.Visible = problem != null;
             refresh.Text = busy && !connected ? "Connecting…" : "Refresh connection";
             refresh.Enabled = !busy;
@@ -163,10 +181,9 @@ namespace Buds3Control
             foreach (var choice in choices)
             {
                 choice.Value.Enabled = connected && !busy;
-                choice.Value.Checked = choice.Key == NoiseMode.Cancellation
-                    ? BudsSession.ModeGroup(current) == NoiseMode.Cancellation
-                    : choice.Key == current;
+                choice.Value.Checked = BudsSession.MatchesMode(current, choice.Key);
             }
+            controls.Render(connected, busy, current, battery, problem);
         }
 
         private static string AncLevelLabel(NoiseMode? mode)
@@ -179,11 +196,6 @@ namespace Buds3Control
                 case NoiseMode.AncSmart: return "Auto";
                 default: return null;
             }
-        }
-
-        private static string FormatBattery(byte? level)
-        {
-            return level.HasValue ? level.Value + "%" : "—";
         }
 
         protected override void ExitThreadCore()
@@ -199,6 +211,7 @@ namespace Buds3Control
             if (disposing)
             {
                 timer.Dispose();
+                controls.Dispose();
                 icon.Dispose();
                 menu.Dispose();
                 artwork.Dispose();
@@ -211,14 +224,15 @@ namespace Buds3Control
         {
             using (var bitmap = new Bitmap(32, 32))
             using (var graphics = Graphics.FromImage(bitmap))
-            using (var brush = new SolidBrush(Color.FromArgb(0, 101, 204)))
-            using (var pen = new Pen(Color.White, 2.5f))
+            using (var brush = new SolidBrush(Color.FromArgb(178, 243, 216)))
+            using (var headset = new SolidBrush(Color.FromArgb(21, 41, 32)))
+            using (var pen = new Pen(headset, 2.5f))
             {
                 graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
                 graphics.FillEllipse(brush, 1, 1, 30, 30);
                 graphics.DrawArc(pen, 7, 7, 18, 18, 180, 180);
-                graphics.FillEllipse(Brushes.White, 6, 14, 6, 10);
-                graphics.FillEllipse(Brushes.White, 20, 14, 6, 10);
+                graphics.FillEllipse(headset, 6, 14, 6, 10);
+                graphics.FillEllipse(headset, 20, 14, 6, 10);
                 IntPtr handle = bitmap.GetHicon();
                 try { return (Icon)Icon.FromHandle(handle).Clone(); }
                 finally { DestroyIcon(handle); }
@@ -227,9 +241,6 @@ namespace Buds3Control
 
         [DllImport("user32.dll")]
         private static extern bool DestroyIcon(IntPtr handle);
-
-        [DllImport("user32.dll")]
-        private static extern bool SetForegroundWindow(IntPtr handle);
 
         private sealed class Result
         {

@@ -19,7 +19,7 @@ namespace Buds3Control
 
                 if (!acquired)
                 {
-                    const string message = "Buds 3 Control is already running in the taskbar notification area.";
+                    const string message = "Buds 3 Control is already running. Click its taskbar notification icon to open the control panel.";
                     if (args.Length == 0) MessageBox.Show(message, AppName);
                     else Console.Error.WriteLine(message);
                     return 1;
@@ -89,6 +89,11 @@ namespace Buds3Control
                 case NoiseMode.Off: return "Off";
                 default: return "Unknown mode";
             }
+        }
+
+        internal static string FormatBattery(byte? level)
+        {
+            return level.HasValue ? level.Value + "%" : "—";
         }
     }
 }

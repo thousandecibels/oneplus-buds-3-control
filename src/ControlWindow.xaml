@@ -1,0 +1,220 @@
+<Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Buds 3 Control" Width="688" Height="571" MinWidth="565" MinHeight="480"
+        WindowStartupLocation="CenterScreen" Background="#10141C" Foreground="#F1F5FA"
+        FontFamily="Segoe UI Variable Text, Segoe UI" FontSize="13"
+        UseLayoutRounding="True" TextOptions.TextFormattingMode="Display">
+    <Window.Resources>
+        <SolidColorBrush x:Key="Muted" Color="#AEBBCB"/>
+        <SolidColorBrush x:Key="Mint" Color="#AEF3D6"/>
+        <SolidColorBrush x:Key="Surface" Color="#191F2A"/>
+        <SolidColorBrush x:Key="Line" Color="#333D4E"/>
+        <Style x:Key="SectionTitle" TargetType="TextBlock">
+            <Setter Property="FontFamily" Value="Segoe UI Variable Display, Segoe UI"/>
+            <Setter Property="FontSize" Value="18"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+        </Style>
+        <Style x:Key="BatteryCard" TargetType="Border">
+            <Setter Property="Background" Value="{StaticResource Surface}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource Line}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="12"/>
+            <Setter Property="Padding" Value="14,11,14,13"/>
+        </Style>
+        <Style x:Key="ChargeNumber" TargetType="TextBlock">
+            <Setter Property="FontFamily" Value="Segoe UI Variable Display, Segoe UI"/>
+            <Setter Property="FontSize" Value="28"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Margin" Value="0,3,0,8"/>
+        </Style>
+        <Style x:Key="ChargeBar" TargetType="ProgressBar">
+            <Setter Property="Height" Value="5"/>
+            <Setter Property="Maximum" Value="100"/>
+            <Setter Property="Foreground" Value="{StaticResource Mint}"/>
+            <Setter Property="Background" Value="{StaticResource Line}"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ProgressBar">
+                        <Grid>
+                            <Border x:Name="PART_Track" Background="{TemplateBinding Background}" CornerRadius="2.5"/>
+                            <Border x:Name="PART_Indicator" HorizontalAlignment="Left"
+                                    Background="{TemplateBinding Foreground}" CornerRadius="2.5"/>
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key="ControlButton" TargetType="Button">
+            <Setter Property="Height" Value="40"/>
+            <Setter Property="Background" Value="#222A38"/>
+            <Setter Property="Foreground" Value="#E4ECF7"/>
+            <Setter Property="BorderBrush" Value="{StaticResource Line}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Frame" Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="8" Padding="7,0">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" RecognizesAccessKey="True"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Frame" Property="Background" Value="#2D3949"/>
+                                <Setter TargetName="Frame" Property="BorderBrush" Value="#697B90"/>
+                            </Trigger>
+                            <Trigger Property="Tag" Value="Selected">
+                                <Setter TargetName="Frame" Property="Background" Value="#B2F3D8"/>
+                                <Setter TargetName="Frame" Property="BorderBrush" Value="#B2F3D8"/>
+                                <Setter Property="Foreground" Value="#152920"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="Frame" Property="Opacity" Value=".8"/>
+                            </Trigger>
+                            <Trigger Property="IsKeyboardFocused" Value="True">
+                                <Setter TargetName="Frame" Property="BorderBrush" Value="#FFFFFF"/>
+                                <Setter TargetName="Frame" Property="BorderThickness" Value="2"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="Frame" Property="Opacity" Value=".64"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key="FooterButton" TargetType="Button" BasedOn="{StaticResource ControlButton}">
+            <Setter Property="Height" Value="32"/>
+            <Setter Property="MinWidth" Value="89"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="FontWeight" Value="Normal"/>
+        </Style>
+    </Window.Resources>
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Focusable="False">
+        <StackPanel Margin="24,20,24,16">
+            <Border CornerRadius="16" BorderBrush="#38504F" BorderThickness="1" Height="134">
+                <Border.Background>
+                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,.85">
+                        <GradientStop Color="#202B3C" Offset="0"/>
+                        <GradientStop Color="#162B2C" Offset="1"/>
+                    </LinearGradientBrush>
+                </Border.Background>
+                <Grid Margin="20,15">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="162"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock Text="B L U E T O O T H   A U D I O" AutomationProperties.Name="Bluetooth audio" FontSize="10"
+                                   FontWeight="SemiBold" Foreground="{StaticResource Mint}"/>
+                        <TextBlock Text="OnePlus Buds 3" FontFamily="Segoe UI Variable Display, Segoe UI"
+                                   FontSize="35" FontWeight="SemiBold" Margin="0,1,0,7"/>
+                        <Border HorizontalAlignment="Left" Padding="8,4" CornerRadius="8" Background="#172127">
+                            <StackPanel Orientation="Horizontal">
+                                <Ellipse x:Name="ConnectionDot" Width="7" Height="7" Margin="0,0,6,0"
+                                         Fill="{StaticResource Muted}"/>
+                                <TextBlock x:Name="ConnectionText" Foreground="#DAE6E9" FontSize="11"/>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                    <Viewbox Grid.Column="1" Width="148" Height="105" HorizontalAlignment="Right"
+                             IsHitTestVisible="False" Focusable="False">
+                        <Canvas Width="160" Height="110">
+                            <Ellipse Canvas.Left="36" Canvas.Top="0" Width="109" Height="109" Stroke="#345251"/>
+                            <Ellipse Canvas.Left="50" Canvas.Top="14" Width="81" Height="81" Stroke="#3F5F5B"/>
+                            <Path Data="M 24,60 H 37 M 138,26 H 154 M 129,87 H 151"
+                                  Stroke="#689A8C" StrokeThickness="1" StrokeStartLineCap="Round" StrokeEndLineCap="Round"/>
+                            <Path Data="M 58,26 C 41,24 31,36 35,49 C 38,58 46,61 53,58 L 60,87
+                                        C 62,94 70,95 73,89 C 74,87 74,84 73,81 L 66,53 C 76,46 77,30 58,26 Z">
+                                <Path.Fill>
+                                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                        <GradientStop Color="#E1F8EE" Offset="0"/>
+                                        <GradientStop Color="#79B7A5" Offset="1"/>
+                                    </LinearGradientBrush>
+                                </Path.Fill>
+                            </Path>
+                            <Path Data="M 119,19 C 136,17 146,29 142,42 C 139,51 131,54 124,51 L 117,80
+                                        C 115,87 107,88 104,82 C 103,80 103,77 104,74 L 111,46 C 101,39 100,23 119,19 Z">
+                                <Path.Fill>
+                                    <LinearGradientBrush StartPoint="1,0" EndPoint="0,1">
+                                        <GradientStop Color="#EDFFF6" Offset="0"/>
+                                        <GradientStop Color="#88C7B4" Offset="1"/>
+                                    </LinearGradientBrush>
+                                </Path.Fill>
+                            </Path>
+                            <Path Data="M 41,43 C 44,48 48,50 54,48 M 136,36 C 133,41 129,43 123,41"
+                                  Stroke="#467970" StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round"/>
+                            <Ellipse Canvas.Left="86" Canvas.Top="89" Width="4" Height="4" Fill="#B2F3D8"/>
+                        </Canvas>
+                    </Viewbox>
+                </Grid>
+            </Border>
+
+            <DockPanel Margin="0,17,0,8" LastChildFill="False">
+                <TextBlock Text="Battery" Style="{StaticResource SectionTitle}"/>
+                <TextBlock x:Name="BatteryHint" DockPanel.Dock="Right" VerticalAlignment="Center"
+                           FontSize="11" Foreground="{StaticResource Muted}"/>
+            </DockPanel>
+            <UniformGrid Columns="3">
+                <Border Style="{StaticResource BatteryCard}" Margin="0,0,4,0">
+                    <StackPanel>
+                        <TextBlock Text="Left bud" Foreground="{StaticResource Muted}"/>
+                        <TextBlock x:Name="LeftBattery" Style="{StaticResource ChargeNumber}"/>
+                        <ProgressBar x:Name="LeftCharge" Style="{StaticResource ChargeBar}" AutomationProperties.Name="Left bud battery"/>
+                    </StackPanel>
+                </Border>
+                <Border Style="{StaticResource BatteryCard}" Margin="4,0">
+                    <StackPanel>
+                        <TextBlock Text="Right bud" Foreground="{StaticResource Muted}"/>
+                        <TextBlock x:Name="RightBattery" Style="{StaticResource ChargeNumber}"/>
+                        <ProgressBar x:Name="RightCharge" Style="{StaticResource ChargeBar}" AutomationProperties.Name="Right bud battery"/>
+                    </StackPanel>
+                </Border>
+                <Border Style="{StaticResource BatteryCard}" Margin="4,0,0,0">
+                    <StackPanel>
+                        <TextBlock Text="Charging case" Foreground="{StaticResource Muted}"/>
+                        <TextBlock x:Name="CaseBattery" Style="{StaticResource ChargeNumber}"/>
+                        <ProgressBar x:Name="CaseCharge" Style="{StaticResource ChargeBar}" AutomationProperties.Name="Charging case battery"/>
+                    </StackPanel>
+                </Border>
+            </UniformGrid>
+
+            <TextBlock Text="Noise control" Style="{StaticResource SectionTitle}" Margin="0,17,0,8"/>
+            <Border Style="{StaticResource BatteryCard}" Padding="12">
+                <StackPanel>
+                    <UniformGrid Columns="3">
+                        <Button x:Name="Cancellation" Content="Noise cancellation" Style="{StaticResource ControlButton}" Margin="0,0,4,0"/>
+                        <Button x:Name="Transparency" Content="Transparency" Style="{StaticResource ControlButton}" Margin="4,0"/>
+                        <Button x:Name="Off" Content="Off" Style="{StaticResource ControlButton}" Margin="4,0,0,0"/>
+                    </UniformGrid>
+                    <DockPanel Margin="0,11,0,0">
+                        <TextBlock Text="ANC level" Width="78" VerticalAlignment="Center" FontWeight="SemiBold"
+                                   Foreground="{StaticResource Muted}"/>
+                        <UniformGrid Columns="4">
+                            <Button x:Name="Low" Content="Low" Style="{StaticResource ControlButton}" Height="34" Margin="0,0,4,0"/>
+                            <Button x:Name="Moderate" Content="Moderate" Style="{StaticResource ControlButton}" Height="34" Margin="4,0"/>
+                            <Button x:Name="High" Content="High" Style="{StaticResource ControlButton}" Height="34" Margin="4,0"/>
+                            <Button x:Name="Auto" Content="Auto" Style="{StaticResource ControlButton}" Height="34" Margin="4,0,0,0"
+                                    ToolTip="Adjusts noise cancellation to your surroundings"/>
+                        </UniformGrid>
+                    </DockPanel>
+                </StackPanel>
+            </Border>
+            <TextBlock x:Name="Problem" Margin="0,9,0,0" Foreground="#FFCCAA"
+                       TextWrapping="Wrap" Visibility="Collapsed"/>
+
+            <DockPanel Margin="0,14,0,0">
+                <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+                    <Button x:Name="BluetoothSettings" Content="Bluetooth settings" Style="{StaticResource FooterButton}" MinWidth="116" Margin="0,0,8,0"/>
+                    <Button x:Name="Refresh" Content="Refresh" Style="{StaticResource FooterButton}"/>
+                </StackPanel>
+                <TextBlock Text="Closing this window keeps the tray app running." Foreground="{StaticResource Muted}"
+                           VerticalAlignment="Center" FontSize="11" TextWrapping="Wrap" Margin="0,0,12,0"/>
+            </DockPanel>
+        </StackPanel>
+    </ScrollViewer>
+</Window>

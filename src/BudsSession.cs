@@ -159,15 +159,15 @@ namespace Buds3Control
                 return String.Format("The earbuds rejected the mode change (0x{0:X2}).", reply[0]);
             }
 
-            for (int attempt = 0; attempt < 2 && !MatchesTarget(current, target); attempt++)
+            for (int attempt = 0; attempt < 2 && !MatchesMode(current, target); attempt++)
             {
                 Thread.Sleep(200);
                 current = ReadMode();
             }
-            return MatchesTarget(current, target) ? null : "The earbuds did not confirm the requested mode.";
+            return MatchesMode(current, target) ? null : "The earbuds did not confirm the requested mode.";
         }
 
-        private static bool MatchesTarget(NoiseMode? current, NoiseMode target)
+        internal static bool MatchesMode(NoiseMode? current, NoiseMode target)
         {
             return target == NoiseMode.Cancellation ? ModeGroup(current) == target : current == target;
         }
