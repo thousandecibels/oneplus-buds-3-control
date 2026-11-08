@@ -82,7 +82,7 @@ namespace Buds3Control
 
         internal static string ModeLabel(NoiseMode? mode)
         {
-            switch (mode)
+            switch (BudsSession.ModeGroup(mode))
             {
                 case NoiseMode.Cancellation: return "Noise Cancellation";
                 case NoiseMode.Transparency: return "Transparency";

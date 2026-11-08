@@ -17,6 +17,7 @@ namespace Buds3Control
         private readonly ToolStripLabel status;
         private readonly ToolStripLabel batteryStatus;
         private readonly Dictionary<NoiseMode, ToolStripMenuItem> choices;
+        private readonly ToolStripMenuItem ancLevelMenu;
         private readonly ToolStripMenuItem refresh;
         private readonly ToolStripMenuItem details;
         private readonly Timer timer;
@@ -41,9 +42,15 @@ namespace Buds3Control
             menu.Items.Add(batteryStatus);
             menu.Items.Add(new ToolStripSeparator());
             choices = new Dictionary<NoiseMode, ToolStripMenuItem>();
-            AddChoice(NoiseMode.Cancellation);
-            AddChoice(NoiseMode.Transparency);
-            AddChoice(NoiseMode.Off);
+            AddChoice(menu.Items, NoiseMode.Cancellation);
+            ancLevelMenu = new ToolStripMenuItem("ANC level");
+            AddChoice(ancLevelMenu.DropDownItems, NoiseMode.AncMild);
+            AddChoice(ancLevelMenu.DropDownItems, NoiseMode.AncModerate);
+            AddChoice(ancLevelMenu.DropDownItems, NoiseMode.AncMax);
+            AddChoice(ancLevelMenu.DropDownItems, NoiseMode.AncSmart);
+            menu.Items.Add(ancLevelMenu);
+            AddChoice(menu.Items, NoiseMode.Transparency);
+            AddChoice(menu.Items, NoiseMode.Off);
             menu.Items.Add(new ToolStripSeparator());
             refresh = new ToolStripMenuItem("Refresh connection", null, (sender, args) => UpdateAsync(null));
             menu.Items.Add(refresh);
@@ -75,11 +82,12 @@ namespace Buds3Control
             timer.Start();
         }
 
-        private void AddChoice(NoiseMode mode)
+        private void AddChoice(ToolStripItemCollection items, NoiseMode mode)
         {
-            var item = new ToolStripMenuItem(Program.ModeLabel(mode), null, (sender, args) => UpdateAsync(mode));
+            string label = AncLevelLabel(mode) ?? Program.ModeLabel(mode);
+            var item = new ToolStripMenuItem(label, null, (sender, args) => UpdateAsync(mode));
             choices.Add(mode, item);
-            menu.Items.Add(item);
+            items.Add(item);
         }
 
         private async void UpdateAsync(NoiseMode? target)
@@ -139,6 +147,8 @@ namespace Buds3Control
         private void Render()
         {
             string mode = Program.ModeLabel(current);
+            string level = AncLevelLabel(current);
+            if (level != null) mode += " · " + level;
             status.Text = connected ? ("Connected  ·  " + mode) : (busy ? "Connecting…" : "Disconnected");
             status.ToolTipText = problem;
             status.AutoToolTip = problem != null;
@@ -148,11 +158,26 @@ namespace Buds3Control
             details.Visible = problem != null;
             refresh.Text = busy && !connected ? "Connecting…" : "Refresh connection";
             refresh.Enabled = !busy;
+            ancLevelMenu.Enabled = connected;
             icon.Text = connected ? (Bluetooth.DeviceName + " · " + mode) : (Program.AppName + " · " + status.Text);
             foreach (var choice in choices)
             {
                 choice.Value.Enabled = connected && !busy;
-                choice.Value.Checked = choice.Key == current;
+                choice.Value.Checked = choice.Key == NoiseMode.Cancellation
+                    ? BudsSession.ModeGroup(current) == NoiseMode.Cancellation
+                    : choice.Key == current;
+            }
+        }
+
+        private static string AncLevelLabel(NoiseMode? mode)
+        {
+            switch (mode)
+            {
+                case NoiseMode.AncMild: return "Low";
+                case NoiseMode.AncModerate: return "Moderate";
+                case NoiseMode.AncMax: return "High";
+                case NoiseMode.AncSmart: return "Auto";
+                default: return null;
             }
         }
 

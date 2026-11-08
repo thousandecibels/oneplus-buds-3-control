@@ -8,6 +8,8 @@ A portable Windows 11 taskbar app for **OnePlus Buds 3**. Switch between **Noise
 2. Double-click `dist\Buds3Control.exe`. Windows may place the blue headphones icon under the taskbar’s **Show hidden icons** arrow.
 3. Right-click the icon and choose a mode. A check mark shows the mode the earbuds report. **Exit** closes the app.
 
+Open **ANC level** and choose **Low**, **Moderate**, **High**, or **Auto**. Choosing a level turns on Noise Cancellation. The **Noise Cancellation** shortcut uses the earbuds' last ANC level. Auto adjusts the strength to your surroundings.
+
 The menu shows the battery percentage for the left bud, right bud, and case. A dash means the earbuds did not report a reading for that part. Open the case lid to see its level when available. Readings refresh about every 10 seconds, or immediately with **Refresh connection**.
 
 The app reconnects when the earbuds wake up. If it stays disconnected, open the menu and choose **Connection details**. If another earbud control app is connected, close it and choose **Refresh connection**. The app looks for the Bluetooth name `OnePlus Buds 3` and checks the model ID before enabling writes.

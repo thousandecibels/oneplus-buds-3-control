@@ -10,7 +10,11 @@ namespace Buds3Control
     {
         Off = 0x01,
         Cancellation = 0x02,
-        Transparency = 0x04
+        Transparency = 0x04,
+        AncMax = 0x10,
+        AncModerate = 0x20,
+        AncMild = 0x40,
+        AncSmart = 0x80
     }
 
     internal struct BatteryLevels
@@ -85,16 +89,34 @@ namespace Buds3Control
                 case 0x0008:
                     return NoiseMode.Off;
                 case 0x0002:
-                case 0x0010:
-                case 0x0020:
-                case 0x0040:
-                case 0x0080:
                     return NoiseMode.Cancellation;
+                case 0x0010:
+                    return NoiseMode.AncMax;
+                case 0x0020:
+                    return NoiseMode.AncModerate;
+                case 0x0040:
+                    return NoiseMode.AncMild;
+                case 0x0080:
+                    return NoiseMode.AncSmart;
                 case 0x0004:
                 case 0x0100:
                     return NoiseMode.Transparency;
                 default:
                     return null;
+            }
+        }
+
+        internal static NoiseMode? ModeGroup(NoiseMode? mode)
+        {
+            switch (mode)
+            {
+                case NoiseMode.AncMild:
+                case NoiseMode.AncModerate:
+                case NoiseMode.AncMax:
+                case NoiseMode.AncSmart:
+                    return NoiseMode.Cancellation;
+                default:
+                    return mode;
             }
         }
 
@@ -137,12 +159,17 @@ namespace Buds3Control
                 return String.Format("The earbuds rejected the mode change (0x{0:X2}).", reply[0]);
             }
 
-            for (int attempt = 0; attempt < 2 && current != target; attempt++)
+            for (int attempt = 0; attempt < 2 && !MatchesTarget(current, target); attempt++)
             {
                 Thread.Sleep(200);
                 current = ReadMode();
             }
-            return current == target ? null : "The earbuds did not confirm the requested mode.";
+            return MatchesTarget(current, target) ? null : "The earbuds did not confirm the requested mode.";
+        }
+
+        private static bool MatchesTarget(NoiseMode? current, NoiseMode target)
+        {
+            return target == NoiseMode.Cancellation ? ModeGroup(current) == target : current == target;
         }
 
         private byte[] Request(ushort command, params byte[] payload)
