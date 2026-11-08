@@ -1,6 +1,8 @@
-<img src="docs/images/app-icon.png" alt="Buds 3 Control app icon" width="72" height="72">
+<p align="center">
+  <img src="docs/images/app-icon.png" alt="Buds 3 Control app icon" width="72" height="72">
+</p>
 
-# Buds 3 Control
+<h1 align="center">Buds 3 Control</h1>
 
 A Windows 11 app for **OnePlus Buds 3** with a control panel and taskbar shortcuts. Switch between **Noise Cancellation**, **Transparency**, and **Off** over Bluetooth.
 
