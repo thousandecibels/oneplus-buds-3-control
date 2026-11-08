@@ -1,13 +1,29 @@
+<img src="docs/images/app-icon.png" alt="Buds 3 Control app icon" width="72" height="72">
+
 # Buds 3 Control
 
 A Windows 11 app for **OnePlus Buds 3** with a control panel and taskbar shortcuts. Switch between **Noise Cancellation**, **Transparency**, and **Off** over Bluetooth.
 
 ## Choose a build
 
+Get the installer or portable executable from the [latest Windows release](https://github.com/thousandecibels/oneplus-buds-3-control/releases/latest).
+
 - **Installer** · Run `Buds3Control-Setup.exe` for a per-user install and a Start menu shortcut. Windows lists **Buds 3 Control** under **Settings → Apps → Installed apps** for uninstalling.
 - **Portable** · Run `Buds3Control.exe` from any folder. It contains the same app as the installer.
 
 Use **Exit** in the tray menu to close a running copy before installing, updating, or uninstalling.
+
+## Screenshots
+
+The screenshots show example battery readings with Moderate noise cancellation selected.
+
+### Windows control panel
+
+![Buds 3 Control window with three battery cards and Moderate ANC selected](docs/images/control-panel.jpg)
+
+### Tray quick controls
+
+![Buds 3 Control tray menu with battery percentages, noise modes, and an ANC level submenu](docs/images/tray-menu.jpg)
 
 ## Run
 
