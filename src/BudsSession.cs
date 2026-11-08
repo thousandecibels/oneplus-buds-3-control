@@ -13,6 +13,20 @@ namespace Buds3Control
         Transparency = 0x04
     }
 
+    internal struct BatteryLevels
+    {
+        internal readonly byte? Left;
+        internal readonly byte? Right;
+        internal readonly byte? Case;
+
+        internal BatteryLevels(byte? left, byte? right, byte? chargingCase)
+        {
+            Left = left;
+            Right = right;
+            Case = chargingCase;
+        }
+    }
+
     internal sealed class BudsSession : IDisposable
     {
         private readonly NetworkStream stream;
@@ -82,6 +96,27 @@ namespace Buds3Control
                 default:
                     return null;
             }
+        }
+
+        internal BatteryLevels ReadBattery()
+        {
+            byte[] reply = Request(0x0106);
+            if (reply.Length < 2 || reply[0] != 0 || reply.Length < 2 + reply[1] * 2)
+            {
+                return default(BatteryLevels);
+            }
+
+            var levels = new byte?[3];
+            for (int i = 2; i < 2 + reply[1] * 2; i += 2)
+            {
+                int part = reply[i] - 1;
+                byte level = (byte)(reply[i + 1] & 0x7F); // Bit 7 is the charging flag.
+                if (part >= 0 && part < levels.Length && level >= 1 && level <= 100)
+                {
+                    levels[part] = level;
+                }
+            }
+            return new BatteryLevels(levels[0], levels[1], levels[2]);
         }
 
         internal string SetMode(NoiseMode target, out NoiseMode? current)

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.IO;
 using System.Net.Sockets;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
@@ -14,12 +15,14 @@ namespace Buds3Control
         private readonly Icon artwork;
         private readonly ContextMenuStrip menu;
         private readonly ToolStripLabel status;
+        private readonly ToolStripLabel batteryStatus;
         private readonly Dictionary<NoiseMode, ToolStripMenuItem> choices;
         private readonly ToolStripMenuItem refresh;
         private readonly ToolStripMenuItem details;
         private readonly Timer timer;
         private BudsSession session;
         private NoiseMode? current;
+        private BatteryLevels battery;
         private bool busy;
         private bool exiting;
         private bool connected;
@@ -34,6 +37,8 @@ namespace Buds3Control
             });
             status = new ToolStripLabel();
             menu.Items.Add(status);
+            batteryStatus = new ToolStripLabel();
+            menu.Items.Add(batteryStatus);
             menu.Items.Add(new ToolStripSeparator());
             choices = new Dictionary<NoiseMode, ToolStripMenuItem>();
             AddChoice(NoiseMode.Cancellation);
@@ -89,6 +94,7 @@ namespace Buds3Control
             busy = false;
             connected = result.Connected;
             current = result.Mode;
+            if (!connected || !target.HasValue) battery = result.Battery;
             problem = result.Error;
             Render();
             if (problem != null && target.HasValue)
@@ -102,7 +108,13 @@ namespace Buds3Control
             try
             {
                 if (session == null) session = BudsSession.Open();
-                if (!target.HasValue) return new Result { Connected = true, Mode = session.ReadMode() };
+                if (!target.HasValue)
+                {
+                    var result = new Result { Connected = true, Mode = session.ReadMode() };
+                    try { result.Battery = session.ReadBattery(); }
+                    catch (IOException) { /* A failed battery read leaves the noise controls available. */ }
+                    return result;
+                }
 
                 NoiseMode? mode;
                 string error = session.SetMode(target.Value, out mode);
@@ -130,6 +142,9 @@ namespace Buds3Control
             status.Text = connected ? ("Connected  ·  " + mode) : (busy ? "Connecting…" : "Disconnected");
             status.ToolTipText = problem;
             status.AutoToolTip = problem != null;
+            batteryStatus.Visible = connected;
+            batteryStatus.Text = String.Format("Left {0}   Right {1}   Case {2}",
+                FormatBattery(battery.Left), FormatBattery(battery.Right), FormatBattery(battery.Case));
             details.Visible = problem != null;
             refresh.Text = busy && !connected ? "Connecting…" : "Refresh connection";
             refresh.Enabled = !busy;
@@ -139,6 +154,11 @@ namespace Buds3Control
                 choice.Value.Enabled = connected && !busy;
                 choice.Value.Checked = choice.Key == current;
             }
+        }
+
+        private static string FormatBattery(byte? level)
+        {
+            return level.HasValue ? level.Value + "%" : "—";
         }
 
         protected override void ExitThreadCore()
@@ -190,6 +210,7 @@ namespace Buds3Control
         {
             internal bool Connected;
             internal NoiseMode? Mode;
+            internal BatteryLevels Battery;
             internal string Error;
         }
     }
