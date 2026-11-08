@@ -5,7 +5,7 @@ A portable Windows 11 app for **OnePlus Buds 3** with a control panel and taskba
 ## Run
 
 1. Pair the earbuds in **Settings → Bluetooth & devices**. Leave them awake and put at least one in your ear to change modes.
-2. Double-click `dist\Buds3Control.exe` to open the control panel. Windows may place the mint headphones icon under the taskbar’s **Show hidden icons** arrow.
+2. Double-click `dist\Buds3Control.exe` to open the control panel. Windows may place the mint earbuds icon under the taskbar’s **Show hidden icons** arrow.
 3. Choose a noise mode or ANC level in the panel. Closing the panel leaves the app in the tray. Click the tray icon to reopen it, or right-click for quick controls and **Exit**.
 
 Open **ANC level** and choose **Low**, **Moderate**, **High**, or **Auto**. Choosing a level turns on Noise Cancellation. The **Noise Cancellation** shortcut uses the earbuds' last ANC level. Auto adjusts the strength to your surroundings.

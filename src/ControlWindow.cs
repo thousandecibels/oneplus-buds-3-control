@@ -26,13 +26,14 @@ namespace Buds3Control
         private readonly BatteryCard chargingCase;
         private bool closing;
 
-        internal ControlWindow(IntPtr icon, Action<NoiseMode> setMode, Action refresh, Action openBluetooth)
+        internal ControlWindow(Stream icon, Action<NoiseMode> setMode, Action refresh, Action openBluetooth)
         {
             using (Stream layout = typeof(ControlWindow).Assembly.GetManifestResourceStream("ControlWindow.xaml"))
             {
                 window = (Window)XamlReader.Load(layout);
             }
-            window.Icon = Imaging.CreateBitmapSourceFromHIcon(icon, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
+            var decoder = new IconBitmapDecoder(icon, BitmapCreateOptions.PreservePixelFormat, BitmapCacheOption.OnLoad);
+            window.Icon = decoder.Frames[decoder.Frames.Count - 1];
             window.SourceInitialized += (sender, args) => ApplyCaptionColors(new WindowInteropHelper(window).Handle);
             window.Closing += (sender, args) =>
             {

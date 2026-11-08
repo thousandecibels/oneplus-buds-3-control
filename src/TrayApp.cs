@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Net.Sockets;
-using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -65,8 +64,12 @@ namespace Buds3Control
                 (sender, args) => OpenBluetoothSettings()));
             menu.Items.Add(new ToolStripMenuItem("Exit", null, (sender, args) => ExitThread()));
 
-            artwork = CreateIcon();
-            controls = new ControlWindow(artwork.Handle, mode => UpdateAsync(mode), () => UpdateAsync(null), OpenBluetoothSettings);
+            using (Stream iconFile = typeof(TrayApp).Assembly.GetManifestResourceStream("Buds3Control.ico"))
+            {
+                artwork = new Icon(iconFile, SystemInformation.SmallIconSize);
+                iconFile.Position = 0;
+                controls = new ControlWindow(iconFile, mode => UpdateAsync(mode), () => UpdateAsync(null), OpenBluetoothSettings);
+            }
             icon = new NotifyIcon { Icon = artwork, ContextMenuStrip = menu, Text = Program.AppName, Visible = true };
             icon.MouseUp += (sender, args) =>
             {
@@ -219,28 +222,6 @@ namespace Buds3Control
             }
             base.Dispose(disposing);
         }
-
-        private static Icon CreateIcon()
-        {
-            using (var bitmap = new Bitmap(32, 32))
-            using (var graphics = Graphics.FromImage(bitmap))
-            using (var brush = new SolidBrush(Color.FromArgb(178, 243, 216)))
-            using (var headset = new SolidBrush(Color.FromArgb(21, 41, 32)))
-            using (var pen = new Pen(headset, 2.5f))
-            {
-                graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
-                graphics.FillEllipse(brush, 1, 1, 30, 30);
-                graphics.DrawArc(pen, 7, 7, 18, 18, 180, 180);
-                graphics.FillEllipse(headset, 6, 14, 6, 10);
-                graphics.FillEllipse(headset, 20, 14, 6, 10);
-                IntPtr handle = bitmap.GetHicon();
-                try { return (Icon)Icon.FromHandle(handle).Clone(); }
-                finally { DestroyIcon(handle); }
-            }
-        }
-
-        [DllImport("user32.dll")]
-        private static extern bool DestroyIcon(IntPtr handle);
 
         private sealed class Result
         {
